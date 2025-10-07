@@ -10,7 +10,7 @@ from duckduckgo_search import DDGS
 agent = ReactAgent(
     name="Research Assistant",
     description="An AI assistant specialized in web research and calculations",
-    model="gpt-4o-mini",
+    provider="gpt-4o-mini",
     instructions="You are a helpful research assistant. Always provide accurate and well-researched answers.",
     max_iterations=10,
 )

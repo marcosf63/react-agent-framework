@@ -1,11 +1,12 @@
 """
 ReAct Agent Framework - Framework for creating agents with reasoning and acting
 Multi-provider support: OpenAI, Anthropic, Google, Ollama
+Built-in tools: Search, Filesystem, Computation
 """
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 __author__ = "Marcos"
-__description__ = "Generic framework for creating AI agent applications using ReAct pattern with multi-provider support"
+__description__ = "Generic framework for creating AI agent applications using ReAct pattern with multi-provider support and built-in tools"
 
 from react_agent_framework.core.react_agent import ReactAgent
 from react_agent_framework.providers import (

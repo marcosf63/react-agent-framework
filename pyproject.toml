@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "react-agent-framework"
-version = "0.3.0"
-description = "Multi-provider AI agent framework using ReAct pattern - FastAPI-style API"
+version = "0.4.0"
+description = "Multi-provider AI agent framework using ReAct pattern with built-in tools"
 authors = [
     {name = "Marcos", email = "marcosf63@gmail.com"}
 ]
@@ -46,6 +46,18 @@ google = [
 all-providers = [
     "anthropic>=0.18.0",
     "google-generativeai>=0.3.0",
+]
+search = [
+    "duckduckgo-search>=4.0.0",
+]
+computation = [
+    # No extra dependencies - uses stdlib
+]
+filesystem = [
+    # No extra dependencies - uses stdlib
+]
+all-tools = [
+    "duckduckgo-search>=4.0.0",
 ]
 dev = [
     "pytest>=7.0.0",

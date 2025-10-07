@@ -23,7 +23,7 @@ def create_agent(model: str, max_iterations: int) -> ReactAgent:
     agent = ReactAgent(
         name="CLI Assistant",
         description="A command-line AI assistant",
-        model=model,
+        provider=model,
         max_iterations=max_iterations,
     )
 

@@ -11,7 +11,7 @@ import random
 agent = ReactAgent(
     name="Personal Assistant",
     description="A versatile personal assistant with various utilities",
-    model="gpt-4o-mini",
+    provider="gpt-4o-mini",
     instructions="""You are a personal assistant that helps with:
     - Date and time information
     - Random number generation

@@ -137,6 +137,40 @@ You are a ReAct (Reasoning + Acting) agent that solves problems by alternating b
 
         return decorator
 
+    def use_tools(self, *patterns: str, **tool_configs):
+        """
+        Register built-in tools by pattern
+
+        Patterns:
+        - "*" - All available tools
+        - "search.*" - All search tools
+        - "filesystem.*" - All filesystem tools
+        - "computation.*" - All computation tools
+        - "filesystem.read" - Specific tool
+
+        Examples:
+            agent.use_tools("search.*")  # All search tools
+            agent.use_tools("filesystem.read", "filesystem.write")
+            agent.use_tools("computation.calculator")
+            agent.use_tools("*")  # All tools
+
+        Args:
+            *patterns: Tool patterns to register
+            **tool_configs: Configuration for tool initialization
+        """
+        from react_agent_framework.tools.registry import ToolRegistry
+
+        for pattern in patterns:
+            tools = ToolRegistry.find_tools(pattern)
+            for tool in tools:
+                # Create wrapper function for the tool
+                def tool_wrapper(input_text: str, tool_instance=tool) -> str:
+                    return tool_instance(input_text)
+
+                # Register tool
+                self._tools[tool.name] = tool_wrapper
+                self._tool_descriptions[tool.name] = tool.description
+
     def _create_system_prompt(self) -> str:
         """Creates system prompt with available tools"""
         tools_desc = "\n".join(
