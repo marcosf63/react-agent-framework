@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "react-agent-framework"
-version = "0.5.0"
-description = "Multi-provider AI agent framework with memory, built-in tools, and ReAct pattern"
+version = "0.6.0"
+description = "Multi-provider AI agent framework with objectives, memory, built-in tools, and ReAct pattern"
 authors = [
     {name = "Marcos", email = "marcosf63@gmail.com"}
 ]

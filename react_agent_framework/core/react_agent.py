@@ -11,6 +11,8 @@ from react_agent_framework.providers.base import BaseLLMProvider, Message
 from react_agent_framework.providers.factory import create_provider
 from react_agent_framework.core.memory.base import BaseMemory
 from react_agent_framework.core.memory.simple import SimpleMemory
+from react_agent_framework.core.objectives.objective import Objective
+from react_agent_framework.core.objectives.tracker import ObjectiveTracker
 
 load_dotenv()
 
@@ -66,6 +68,7 @@ class ReactAgent:
         execution_date: Optional[datetime] = None,
         memory: Optional[BaseMemory] = None,
         enable_memory: bool = False,
+        objectives: Optional[List[Objective]] = None,
     ):
         """
         Initialize ReactAgent
@@ -83,6 +86,7 @@ class ReactAgent:
             execution_date: Execution date (uses now() if not provided)
             memory: Memory backend (SimpleMemory, ChromaMemory, FAISSMemory)
             enable_memory: Enable simple memory if no memory backend provided
+            objectives: List of objectives for the agent to pursue
         """
         self.name = name
         self.description = description
@@ -104,6 +108,12 @@ class ReactAgent:
             self.memory = SimpleMemory(max_messages=100)
         else:
             self.memory = None
+
+        # Setup objectives
+        self.objectives = ObjectiveTracker()
+        if objectives:
+            for obj in objectives:
+                self.objectives.add(obj)
 
         # Default instructions
         self._instructions = instructions or self._get_default_instructions()
@@ -186,15 +196,40 @@ You are a ReAct (Reasoning + Acting) agent that solves problems by alternating b
                 self._tool_descriptions[tool.name] = tool.description
 
     def _create_system_prompt(self) -> str:
-        """Creates system prompt with available tools"""
+        """Creates system prompt with available tools and objectives"""
         tools_desc = "\n".join(
             [f"- {name}: {desc}" for name, desc in self._tool_descriptions.items()]
         )
 
+        # Add objectives section if there are any
+        objectives_section = ""
+        if len(self.objectives) > 0:
+            active = self.objectives.get_active()
+            pending = self.objectives.get_pending()
+
+            if active or pending:
+                objectives_section = "\n\n## Your Current Objectives:\n"
+
+                if active:
+                    objectives_section += "\n🔄 Active Objectives:\n"
+                    for obj in active:
+                        objectives_section += f"- [{obj.priority.value.upper()}] {obj.goal} (Progress: {obj.progress:.0%})\n"
+                        if obj.success_criteria:
+                            objectives_section += (
+                                f"  Success criteria: {', '.join(obj.success_criteria)}\n"
+                            )
+
+                if pending:
+                    objectives_section += "\n⏳ Pending Objectives:\n"
+                    for obj in pending[:3]:  # Show top 3 pending
+                        objectives_section += f"- [{obj.priority.value.upper()}] {obj.goal}\n"
+
+                objectives_section += "\nIMPORTANT: Keep these objectives in mind while working. Update progress when you make meaningful steps toward completing them.\n"
+
         return f"""{self._instructions}
 
 Available tools:
-{tools_desc}
+{tools_desc}{objectives_section}
 
 You must follow this format EXACTLY:
 
