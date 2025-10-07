@@ -9,6 +9,8 @@ from dotenv import load_dotenv
 
 from react_agent_framework.providers.base import BaseLLMProvider, Message
 from react_agent_framework.providers.factory import create_provider
+from react_agent_framework.core.memory.base import BaseMemory
+from react_agent_framework.core.memory.simple import SimpleMemory
 
 load_dotenv()
 
@@ -62,6 +64,8 @@ class ReactAgent:
         max_iterations: int = 10,
         api_key: Optional[str] = None,
         execution_date: Optional[datetime] = None,
+        memory: Optional[BaseMemory] = None,
+        enable_memory: bool = False,
     ):
         """
         Initialize ReactAgent
@@ -77,6 +81,8 @@ class ReactAgent:
             max_iterations: Maximum iterations
             api_key: API key for the provider (uses env if not provided)
             execution_date: Execution date (uses now() if not provided)
+            memory: Memory backend (SimpleMemory, ChromaMemory, FAISSMemory)
+            enable_memory: Enable simple memory if no memory backend provided
         """
         self.name = name
         self.description = description
@@ -90,6 +96,14 @@ class ReactAgent:
         self._tools: Dict[str, Callable] = {}
         self._tool_descriptions: Dict[str, str] = {}
         self.history: List[Dict[str, Any]] = []
+
+        # Setup memory
+        if memory is not None:
+            self.memory: Optional[BaseMemory] = memory
+        elif enable_memory:
+            self.memory = SimpleMemory(max_messages=100)
+        else:
+            self.memory = None
 
         # Default instructions
         self._instructions = instructions or self._get_default_instructions()
@@ -234,8 +248,26 @@ IMPORTANT:
         Returns:
             The agent's final answer
         """
+        # Add user query to memory
+        if self.memory:
+            self.memory.add(query, role="user")
+
+        # Get relevant context from memory
+        memory_context = ""
+        if self.memory:
+            context_messages = self.memory.get_context(query, max_tokens=1000)
+            if context_messages:
+                memory_context = "\n\nRelevant conversation history:\n"
+                for msg in context_messages:
+                    memory_context += f"[{msg.role}]: {msg.content}\n"
+
+        # Create system prompt with memory context
+        system_prompt = self._create_system_prompt()
+        if memory_context:
+            system_prompt += memory_context
+
         messages = [
-            Message(role="system", content=self._create_system_prompt()),
+            Message(role="system", content=system_prompt),
             Message(role="user", content=query),
         ]
 
@@ -269,15 +301,21 @@ IMPORTANT:
 
             # Check for finish
             if action.lower() == "finish":
+                final_answer = action_input or "No answer provided"
+
+                # Add assistant answer to memory
+                if self.memory:
+                    self.memory.add(final_answer, role="assistant")
+
                 self.history.append(
                     {
                         "iteration": iteration + 1,
                         "thought": thought,
                         "action": action,
-                        "final_answer": action_input,
+                        "final_answer": final_answer,
                     }
                 )
-                return action_input or "No answer provided"
+                return final_answer
 
             # Execute tool
             if action in self._tools:
