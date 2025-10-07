@@ -1,36 +1,54 @@
 """
-New ReactAgent API inspired by FastAPI
+ReactAgent with multi-provider support
 """
 
-import os
 from datetime import datetime
-from typing import Callable, Dict, List, Optional, Any
+from typing import Callable, Dict, List, Optional, Any, Union
 from functools import wraps
-import openai
 from dotenv import load_dotenv
+
+from react_agent_framework.providers.base import BaseLLMProvider, Message
+from react_agent_framework.providers.factory import create_provider
 
 load_dotenv()
 
 
 class ReactAgent:
     """
-    ReAct Agent with FastAPI-style API
+    ReAct Agent with FastAPI-style API and multi-provider support
 
     Example:
         ```python
+        # OpenAI (default)
         agent = ReactAgent(
-            name="Virtual Assistant",
-            description="An intelligent assistant",
-            model="gpt-4o-mini",
-            instructions="You are a helpful assistant..."
+            name="Assistant",
+            provider="gpt-4o-mini"
+        )
+
+        # Anthropic Claude
+        agent = ReactAgent(
+            name="Assistant",
+            provider="anthropic://claude-3-5-sonnet-20241022"
+        )
+
+        # Google Gemini
+        agent = ReactAgent(
+            name="Assistant",
+            provider="google://gemini-1.5-flash"
+        )
+
+        # Ollama (local)
+        agent = ReactAgent(
+            name="Assistant",
+            provider="ollama://llama3.2"
         )
 
         @agent.tool()
         def search(query: str) -> str:
             '''Search the internet'''
-            return search_web(query)
+            return results
 
-        response = agent.run("What is the capital of France?")
+        answer = agent.run("What is the capital of France?")
         ```
     """
 
@@ -38,7 +56,7 @@ class ReactAgent:
         self,
         name: str = "ReactAgent",
         description: str = "An intelligent ReAct agent",
-        model: str = "gpt-4o-mini",
+        provider: Union[str, BaseLLMProvider] = "gpt-4o-mini",
         instructions: Optional[str] = None,
         temperature: float = 0,
         max_iterations: int = 10,
@@ -51,21 +69,24 @@ class ReactAgent:
         Args:
             name: Agent name
             description: Agent description
-            model: OpenAI model to use
+            provider: LLM provider (string or BaseLLMProvider instance)
+                     Examples: "gpt-4o-mini", "anthropic://claude-3-5-sonnet",
+                              "google://gemini-1.5-flash", "ollama://llama3.2"
             instructions: Custom instructions for the agent
             temperature: Model temperature (0-1)
             max_iterations: Maximum iterations
-            api_key: OpenAI API key (uses env if not provided)
+            api_key: API key for the provider (uses env if not provided)
             execution_date: Execution date (uses now() if not provided)
         """
         self.name = name
         self.description = description
-        self.model = model
         self.temperature = temperature
         self.max_iterations = max_iterations
         self.execution_date = execution_date or datetime.now()
 
-        self.client = openai.OpenAI(api_key=api_key or os.getenv("OPENAI_API_KEY"))
+        # Create or use provider
+        self.provider = create_provider(provider, api_key=api_key)
+
         self._tools: Dict[str, Callable] = {}
         self._tool_descriptions: Dict[str, str] = {}
         self.history: List[Dict[str, Any]] = []
@@ -80,6 +101,7 @@ class ReactAgent:
 Description: {self.description}
 
 Execution date: {self.execution_date.strftime('%Y-%m-%d %H:%M:%S')}
+Provider: {self.provider.get_model_name()}
 
 You are a ReAct (Reasoning + Acting) agent that solves problems by alternating between thinking and acting."""
 
@@ -178,9 +200,9 @@ IMPORTANT:
         Returns:
             The agent's final answer
         """
-        messages: List[Dict[str, str]] = [
-            {"role": "system", "content": self._create_system_prompt()},
-            {"role": "user", "content": query},
+        messages = [
+            Message(role="system", content=self._create_system_prompt()),
+            Message(role="user", content=query),
         ]
 
         for iteration in range(self.max_iterations):
@@ -189,12 +211,8 @@ IMPORTANT:
                 print(f"ITERATION {iteration + 1}")
                 print(f"{'='*60}")
 
-            # Call LLM
-            response = self.client.chat.completions.create(
-                model=self.model, messages=messages, temperature=self.temperature  # type: ignore
-            )
-
-            response_text = response.choices[0].message.content or ""
+            # Call LLM via provider
+            response_text = self.provider.generate(messages=messages, temperature=self.temperature)
 
             if verbose:
                 print(f"\n{response_text}")
@@ -203,17 +221,17 @@ IMPORTANT:
             thought, action, action_input = self._extract_thought_action(response_text)
 
             if not action:
-                messages.append({"role": "assistant", "content": response_text})
+                messages.append(Message(role="assistant", content=response_text))
                 messages.append(
-                    {
-                        "role": "user",
-                        "content": "Please provide an Action and Action Input following the specified format.",
-                    }
+                    Message(
+                        role="user",
+                        content="Please provide an Action and Action Input following the specified format.",
+                    )
                 )
                 continue
 
-            # Add to history
-            messages.append({"role": "assistant", "content": response_text})
+            # Add to messages
+            messages.append(Message(role="assistant", content=response_text))
 
             # Check for finish
             if action.lower() == "finish":
@@ -237,7 +255,7 @@ IMPORTANT:
                     )
                     print(f"\nObservation: {obs_display}")
 
-                messages.append({"role": "user", "content": f"Observation: {observation}"})
+                messages.append(Message(role="user", content=f"Observation: {observation}"))
 
                 self.history.append(
                     {
@@ -252,7 +270,7 @@ IMPORTANT:
                 error = (
                     f"Tool '{action}' not found. Available tools: {', '.join(self._tools.keys())}"
                 )
-                messages.append({"role": "user", "content": f"Observation: {error}"})
+                messages.append(Message(role="user", content=f"Observation: {error}"))
 
                 if verbose:
                     print(f"\nObservation: {error}")
@@ -271,7 +289,7 @@ IMPORTANT:
             The agent's final answer
         """
         # For now, just calls sync version
-        # Future versions will implement with async OpenAI client
+        # Future: implement with async providers
         return self.run(query, verbose)
 
     def clear_history(self) -> None:
@@ -282,5 +300,13 @@ IMPORTANT:
         """Returns dictionary with registered tools and their descriptions"""
         return self._tool_descriptions.copy()
 
+    def get_provider_info(self) -> Dict[str, str]:
+        """Returns information about the current provider"""
+        return {
+            "provider": self.provider.__class__.__name__,
+            "model": self.provider.get_model_name(),
+        }
+
     def __repr__(self) -> str:
-        return f"ReactAgent(name='{self.name}', tools={len(self._tools)})"
+        provider_info = self.get_provider_info()
+        return f"ReactAgent(name='{self.name}', provider={provider_info['provider']}, model='{provider_info['model']}', tools={len(self._tools)})"
