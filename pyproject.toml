@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "react-agent-framework"
-version = "0.1.0"
-description = "Framework genérico para criar aplicações com agentes AI usando padrão ReAct"
+version = "0.2.0"
+description = "Framework for creating AI agent applications using ReAct pattern - FastAPI-style API"
 authors = [
     {name = "Marcos", email = "marcosf63@gmail.com"}
 ]

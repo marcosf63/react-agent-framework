@@ -1,19 +1,13 @@
 """
-ReAct Agent Framework - Framework para criar agentes com raciocínio e ação
+ReAct Agent Framework - Framework for creating agents with reasoning and acting
 """
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 __author__ = "Marcos"
-__description__ = "Framework genérico para criar aplicações com agentes AI usando padrão ReAct"
+__description__ = "Generic framework for creating AI agent applications using ReAct pattern"
 
-from react_agent_framework.core.agent import AgenteReAct
-from react_agent_framework.core.base import Ferramenta, Pensamento, Acao, Observacao, AcaoTipo
+from react_agent_framework.core.react_agent import ReactAgent
 
 __all__ = [
-    "AgenteReAct",
-    "Ferramenta",
-    "Pensamento",
-    "Acao",
-    "Observacao",
-    "AcaoTipo",
+    "ReactAgent",
 ]
