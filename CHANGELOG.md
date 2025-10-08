@@ -5,6 +5,34 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [0.9.1] - 2025-10-08
+
+### Adicionado
+- **Unit Tests**: 77 testes unitários com 100% de taxa de sucesso
+  - Testes de imports e exports
+  - Testes de providers (OpenAI, Ollama, factory)
+  - Testes de sistema de memória (SimpleMemory)
+  - Cobertura de código: 25% (focado em módulos core)
+- **CI/CD**: GitHub Actions workflows completos
+  - Testes automatizados em Ubuntu, Windows e macOS
+  - Matriz de Python 3.9, 3.10, 3.11 e 3.12
+  - Publicação automática no PyPI via tags
+  - Badge de status dos testes no README
+- **Test Configuration**: pytest, coverage e fixtures compartilhadas
+- **Documentation**: TESTING.md com guia completo de testes e CI/CD
+
+### Corrigido
+- Importação de FAISS com numpy (TYPE_CHECKING)
+- Importação de MCP client (erro movido para connect_server)
+- Exports faltantes em __init__.py (Objective, Memory classes)
+- Testes de provider factory com mocks corretos
+
+### Alterado
+- **Python 3.8 removido**: Versão mínima agora é Python 3.9+
+  - Python 3.8 EOL em outubro de 2024
+  - Incompatibilidade com type hints modernos (tuple[...])
+- Badge do Python atualizado para 3.9+
+
 ## [0.9.0] - 2025-10-07
 
 ### Adicionado
