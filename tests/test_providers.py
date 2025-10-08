@@ -59,9 +59,10 @@ class TestProviderFactory:
         result = create_provider(provider)
         assert result is provider
 
-    def test_openai_url_style(self):
+    @patch('openai.OpenAI')
+    def test_openai_url_style(self, mock_openai):
         """Test creating OpenAI provider with URL style"""
-        provider = create_provider("openai://gpt-4o-mini")
+        provider = create_provider("openai://gpt-4o-mini", api_key="test-key")
         assert isinstance(provider, OpenAIProvider)
         assert provider.model == "gpt-4o-mini"
 
@@ -81,9 +82,10 @@ class TestProviderFactory:
         provider = create_provider("mistral")
         assert isinstance(provider, OllamaProvider)
 
-    def test_default_to_openai(self):
+    @patch('openai.OpenAI')
+    def test_default_to_openai(self, mock_openai):
         """Test unknown models default to OpenAI"""
-        provider = create_provider("gpt-4o-mini")
+        provider = create_provider("gpt-4o-mini", api_key="test-key")
         assert isinstance(provider, OpenAIProvider)
 
     def test_api_key_passed_through(self):
