@@ -3,7 +3,10 @@
 > Framework for creating AI agents using the ReAct pattern (Reasoning + Acting) - **FastAPI-style API**
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![PyPI version](https://badge.fury.io/py/react-agent-framework.svg)](https://badge.fury.io/py/react-agent-framework)
+[![Downloads](https://pepy.tech/badge/react-agent-framework)](https://pepy.tech/project/react-agent-framework)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Documentation](https://img.shields.io/badge/docs-mkdocs-blue)](https://marcosf63.github.io/react-agent-framework/)
 
 ## 🤖 What is ReAct?
 
