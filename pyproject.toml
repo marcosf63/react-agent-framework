@@ -91,10 +91,10 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/marcos/react-agent-framework"
-Documentation = "https://github.com/marcos/react-agent-framework#readme"
-Repository = "https://github.com/marcos/react-agent-framework"
-Issues = "https://github.com/marcos/react-agent-framework/issues"
+Homepage = "https://marcosf63.github.io/react-agent-framework/"
+Documentation = "https://marcosf63.github.io/react-agent-framework/"
+Repository = "https://github.com/marcosf63/react-agent-framework"
+Issues = "https://github.com/marcosf63/react-agent-framework/issues"
 
 [project.scripts]
 react-agent = "react_agent_framework.cli.app:main"

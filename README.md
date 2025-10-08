@@ -32,7 +32,28 @@ This cycle continues until the agent has enough information to answer.
 
 ## 🔧 Installation
 
-### Local installation (development)
+### From PyPI (Recommended)
+
+```bash
+# Basic installation
+pip install react-agent-framework
+
+# With all optional dependencies
+pip install react-agent-framework[all]
+
+# With specific providers
+pip install react-agent-framework[anthropic]  # Claude support
+pip install react-agent-framework[google]     # Gemini support
+
+# With memory backends
+pip install react-agent-framework[memory-chroma]  # ChromaDB
+pip install react-agent-framework[memory-faiss]   # FAISS
+
+# With MCP support
+pip install react-agent-framework[mcp]
+```
+
+### From source (Development)
 
 ```bash
 # Clone the repository
@@ -49,12 +70,6 @@ pip install -e .
 # Configure OpenAI key
 cp .env.example .env
 # Edit .env file and add your OPENAI_API_KEY
-```
-
-### Installation via pip (when published on PyPI)
-
-```bash
-pip install react-agent-framework
 ```
 
 ## 💻 Usage
