@@ -14,6 +14,15 @@ from react_agent_framework.core.memory.simple import SimpleMemory
 from react_agent_framework.core.objectives.objective import Objective
 from react_agent_framework.core.objectives.tracker import ObjectiveTracker
 
+# MCP support (optional)
+try:
+    from react_agent_framework.mcp.client import MCPClientSync
+    from react_agent_framework.mcp.adapter import MCPToolAdapter
+
+    MCP_AVAILABLE = True
+except ImportError:
+    MCP_AVAILABLE = False
+
 load_dotenv()
 
 
@@ -114,6 +123,13 @@ class ReactAgent:
         if objectives:
             for obj in objectives:
                 self.objectives.add(obj)
+
+        # Setup MCP
+        self.mcp_client: Optional[Any] = None
+        self.mcp_adapter: Optional[Any] = None
+        if MCP_AVAILABLE:
+            self.mcp_client = MCPClientSync()
+            self.mcp_adapter = MCPToolAdapter(self.mcp_client)
 
         # Default instructions
         self._instructions = instructions or self._get_default_instructions()
@@ -414,6 +430,105 @@ IMPORTANT:
             "model": self.provider.get_model_name(),
         }
 
+    def add_mcp_server(
+        self,
+        command: str,
+        args: List[str],
+        env: Optional[Dict[str, str]] = None,
+        name: Optional[str] = None,
+        auto_register: bool = True,
+    ) -> int:
+        """
+        Connect to an MCP server and optionally auto-register its tools
+
+        Args:
+            command: Server command to execute
+            args: Command arguments
+            env: Environment variables
+            name: Optional server name
+            auto_register: Automatically register server tools with agent
+
+        Returns:
+            Server ID
+
+        Example:
+            # Connect to filesystem MCP server
+            server_id = agent.add_mcp_server(
+                command="npx",
+                args=["-y", "@modelcontextprotocol/server-filesystem", "/tmp"],
+                name="filesystem"
+            )
+
+            # Connect to GitHub MCP server
+            server_id = agent.add_mcp_server(
+                command="npx",
+                args=["-y", "@modelcontextprotocol/server-github"],
+                env={"GITHUB_TOKEN": "ghp_..."},
+                name="github"
+            )
+        """
+        if not MCP_AVAILABLE:
+            raise ImportError(
+                "MCP package not installed. Install with: pip install mcp"
+            )
+
+        if self.mcp_client is None:
+            raise RuntimeError("MCP client not initialized")
+
+        # Connect to server
+        server_id = self.mcp_client.connect_server(command, args, env, name)
+
+        # Auto-register tools if requested
+        if auto_register and self.mcp_adapter:
+            num_registered = self.mcp_adapter.register_tools_with_agent(self, server_id)
+            print(f"✓ Registered {num_registered} tools from MCP server '{name or server_id}'")
+
+        return server_id
+
+    def list_mcp_servers(self) -> List[Dict[str, Any]]:
+        """
+        List connected MCP servers
+
+        Returns:
+            List of server information dictionaries
+        """
+        if not MCP_AVAILABLE or self.mcp_client is None:
+            return []
+
+        return self.mcp_client.list_servers()
+
+    def list_mcp_tools(self, server_id: Optional[int] = None) -> List[str]:
+        """
+        List available MCP tools with descriptions
+
+        Args:
+            server_id: Optional server ID to filter (None = all servers)
+
+        Returns:
+            List of tool descriptions
+        """
+        if not MCP_AVAILABLE or self.mcp_adapter is None:
+            return []
+
+        return self.mcp_adapter.list_available_tools(server_id)
+
+    def disconnect_mcp_server(self, server_id: int) -> None:
+        """
+        Disconnect from an MCP server
+
+        Args:
+            server_id: Server ID to disconnect
+        """
+        if not MCP_AVAILABLE or self.mcp_client is None:
+            return
+
+        self.mcp_client.disconnect_server(server_id)
+
     def __repr__(self) -> str:
         provider_info = self.get_provider_info()
-        return f"ReactAgent(name='{self.name}', provider={provider_info['provider']}, model='{provider_info['model']}', tools={len(self._tools)})"
+        mcp_info = ""
+        if MCP_AVAILABLE and self.mcp_client:
+            num_servers = len(self.mcp_client.list_servers())
+            if num_servers > 0:
+                mcp_info = f", mcp_servers={num_servers}"
+        return f"ReactAgent(name='{self.name}', provider={provider_info['provider']}, model='{provider_info['model']}', tools={len(self._tools)}{mcp_info})"

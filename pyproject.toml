@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "react-agent-framework"
-version = "0.8.0"
-description = "Complete AI agent framework with environments, reasoning strategies, objectives, memory, and built-in tools"
+version = "0.9.0"
+description = "Complete AI agent framework with MCP support, environments, reasoning strategies, objectives, memory, and built-in tools"
 authors = [
     {name = "Marcos", email = "marcosf63@gmail.com"}
 ]
@@ -37,6 +37,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+mcp = [
+    "mcp>=1.0.0",
+]
 anthropic = [
     "anthropic>=0.18.0",
 ]
@@ -77,6 +80,7 @@ all = [
     "chromadb>=0.4.0",
     "faiss-cpu>=1.7.4",
     "numpy>=1.24.0",
+    "mcp>=1.0.0",
 ]
 dev = [
     "pytest>=7.0.0",

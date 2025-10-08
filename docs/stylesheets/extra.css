@@ -1,0 +1,17 @@
+/* Extra CSS for ReAct Agent Framework Documentation */
+
+:root {
+  --md-primary-fg-color: #5C6AC4;
+  --md-accent-fg-color: #5C6AC4;
+}
+
+/* Code block improvements */
+.highlight pre {
+  border-radius: 0.5rem;
+}
+
+/* Improve admonition styling */
+.md-typeset .admonition,
+.md-typeset details {
+  border-radius: 0.5rem;
+}

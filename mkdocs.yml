@@ -1,0 +1,167 @@
+site_name: ReAct Agent Framework
+site_description: Complete AI agent framework with MCP support, environments, reasoning strategies, objectives, memory, and built-in tools
+site_author: Marcos
+site_url: https://marcosf63.github.io/react-agent-framework/
+
+repo_name: marcosf63/react-agent-framework
+repo_url: https://github.com/marcosf63/react-agent-framework
+edit_uri: edit/main/docs/
+
+copyright: Copyright &copy; 2025 Marcos
+
+theme:
+  name: material
+  language: en
+  palette:
+    # Light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+  features:
+    - navigation.instant      # Instant loading
+    - navigation.tracking     # URL tracking
+    - navigation.tabs         # Navigation tabs
+    - navigation.tabs.sticky  # Sticky navigation tabs
+    - navigation.sections     # Navigation sections
+    - navigation.expand       # Expand navigation
+    - navigation.top          # Back to top button
+    - navigation.footer       # Footer navigation
+    - search.suggest          # Search suggestions
+    - search.highlight        # Search highlighting
+    - search.share            # Share search
+    - content.code.copy       # Code copy button
+    - content.code.annotate   # Code annotations
+    - content.tabs.link       # Linked content tabs
+
+  icon:
+    repo: fontawesome/brands/github
+    logo: material/robot
+
+  font:
+    text: Roboto
+    code: Roboto Mono
+
+# Plugins
+plugins:
+  - search:
+      lang: en
+      separator: '[\s\-,:!=\[\]()"/]+|(?!\b)(?=[A-Z][a-z])|\.(?!\d)|&[lg]t;'
+  - autorefs
+
+# Extensions
+markdown_extensions:
+  # Python Markdown
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+      toc_depth: 3
+
+  # Python Markdown Extensions
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+# Navigation
+nav:
+  - Home: index.md
+
+  - Getting Started:
+    - getting-started/installation.md
+    - getting-started/quickstart.md
+    - getting-started/first-agent.md
+
+  - Features:
+    - features/multi-provider.md
+    - features/built-in-tools.md
+    - features/memory-systems.md
+    - features/objectives.md
+    - features/reasoning-strategies.md
+    - features/environments.md
+    - features/mcp-integration.md
+
+  - Guides:
+    - guides/custom-tools.md
+    - guides/custom-providers.md
+    - guides/memory-backends.md
+    - guides/deployment.md
+
+  - API Reference:
+    - api-reference/react-agent.md
+    - api-reference/providers.md
+    - api-reference/tools.md
+    - api-reference/memory.md
+    - api-reference/objectives.md
+    - api-reference/reasoning.md
+    - api-reference/environments.md
+    - api-reference/mcp.md
+
+  - Examples:
+    - examples/basic-usage.md
+    - examples/web-research.md
+    - examples/data-analysis.md
+    - examples/advanced.md
+
+  - Development:
+    - contributing.md
+    - changelog.md
+
+# Extra
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/marcosf63/react-agent-framework
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/react-agent-framework/
+
+  version:
+    provider: mike
+    default: stable
+
+extra_css:
+  - stylesheets/extra.css
+
+extra_javascript:
+  - javascripts/extra.js

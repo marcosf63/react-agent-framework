@@ -8,11 +8,12 @@ Features:
 - Objectives: Goal-oriented agent management
 - Reasoning strategies: ReAct, ReWOO, Reflection, Plan-Execute
 - Environments: Web, CLI, File system interaction
+- MCP Integration: Connect to Model Context Protocol servers
 """
 
-__version__ = "0.8.0"
+__version__ = "0.9.0"
 __author__ = "Marcos"
-__description__ = "Complete AI agent framework with environments, multiple reasoning strategies, multi-provider support, built-in tools, memory, and objectives"
+__description__ = "Complete AI agent framework with MCP support, environments, multiple reasoning strategies, multi-provider support, built-in tools, memory, and objectives"
 
 from react_agent_framework.core.react_agent import ReactAgent
 from react_agent_framework.providers import (
