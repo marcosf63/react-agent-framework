@@ -1,17 +1,19 @@
 # ReAct Agent Framework
 
-<div align="center">
+<p align="center">
+  <strong>Complete AI agent framework with MCP support, environments, reasoning strategies, objectives, memory, and built-in tools</strong>
+</p>
 
-**Complete AI agent framework with MCP support, environments, reasoning strategies, objectives, memory, and built-in tools**
+<p align="center">
+  <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="Python 3.8+"></a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
+  <a href="https://github.com/marcosf63/react-agent-framework"><img src="https://img.shields.io/badge/version-0.9.0-green.svg" alt="Version"></a>
+</p>
 
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/version-0.9.0-green.svg)](https://github.com/marcosf63/react-agent-framework)
-
-[Getting Started](getting-started/installation.md){ .md-button .md-button--primary }
-[View on GitHub](https://github.com/marcosf63/react-agent-framework){ .md-button }
-
-</div>
+<p align="center">
+  <a href="getting-started/installation/" class="md-button md-button--primary">Getting Started</a>
+  <a href="https://github.com/marcosf63/react-agent-framework" class="md-button">View on GitHub</a>
+</p>
 
 ---
 
@@ -359,10 +361,10 @@ This project is licensed under the MIT License. See the [LICENSE](https://github
 
 ---
 
-<div align="center">
+<p align="center">
+  <strong>Built with :heart: using ReAct Agent Framework</strong>
+</p>
 
-**Built with :heart: using ReAct Agent Framework**
-
-[Get Started Now](getting-started/installation.md){ .md-button .md-button--primary }
-
-</div>
+<p align="center">
+  <a href="getting-started/installation/" class="md-button md-button--primary">Get Started Now</a>
+</p>
