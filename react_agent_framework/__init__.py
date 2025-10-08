@@ -16,6 +16,8 @@ __author__ = "Marcos"
 __description__ = "Complete AI agent framework with MCP support, environments, multiple reasoning strategies, multi-provider support, built-in tools, memory, and objectives"
 
 from react_agent_framework.core.react_agent import ReactAgent
+from react_agent_framework.core.objectives.objective import Objective
+from react_agent_framework.core.memory import SimpleMemory, ChromaMemory, FAISSMemory
 from react_agent_framework.providers import (
     BaseLLMProvider,
     OpenAIProvider,
@@ -26,6 +28,10 @@ from react_agent_framework.providers import (
 
 __all__ = [
     "ReactAgent",
+    "Objective",
+    "SimpleMemory",
+    "ChromaMemory",
+    "FAISSMemory",
     "BaseLLMProvider",
     "OpenAIProvider",
     "AnthropicProvider",

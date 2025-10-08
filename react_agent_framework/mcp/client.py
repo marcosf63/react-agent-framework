@@ -50,11 +50,7 @@ class MCPClient:
 
     def __init__(self):
         """Initialize MCP client"""
-        if not MCP_AVAILABLE:
-            raise ImportError(
-                "MCP package not installed. Install with: pip install mcp"
-            )
-
+        self._mcp_available = MCP_AVAILABLE
         self._servers: Dict[int, Dict[str, Any]] = {}
         self._next_server_id = 0
         self._tools_cache: Dict[int, List[MCPTool]] = {}
@@ -78,6 +74,11 @@ class MCPClient:
         Returns:
             Server ID for future operations
         """
+        if not self._mcp_available:
+            raise ImportError(
+                "MCP package not installed. Install with: pip install mcp"
+            )
+
         server_id = self._next_server_id
         self._next_server_id += 1
 

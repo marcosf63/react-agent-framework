@@ -4,7 +4,10 @@ FAISS vector memory implementation for high-performance similarity search
 
 import json
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import numpy as np
 
 try:
     import faiss
@@ -13,6 +16,8 @@ try:
     FAISS_AVAILABLE = True
 except ImportError:
     FAISS_AVAILABLE = False
+    faiss = None
+    np = None  # type: ignore
 
 from react_agent_framework.core.memory.base import BaseMemory, MemoryMessage
 
@@ -102,7 +107,7 @@ class FAISSMemory(BaseMemory):
         else:
             raise ValueError(f"Unknown index type: {self.index_type}")
 
-    def _get_embedding(self, text: str) -> np.ndarray:
+    def _get_embedding(self, text: str) -> "np.ndarray":
         """Generate embedding for text using OpenAI"""
         response = self.openai_client.embeddings.create(
             input=text,
