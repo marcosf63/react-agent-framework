@@ -8,6 +8,9 @@ on:
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Needed to create releases
+      id-token: write  # Needed for trusted publishing (optional)
 
     steps:
     - name: Checkout code
