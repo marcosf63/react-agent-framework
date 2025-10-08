@@ -1,0 +1,88 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .
+
+    - name: Test basic imports
+      run: |
+        python -c "from react_agent_framework import ReactAgent, Objective, SimpleMemory; print('✅ Imports OK')"
+
+    - name: Test agent creation
+      run: |
+        python -c "
+        from react_agent_framework import ReactAgent
+        agent = ReactAgent(name='Test', provider='gpt-4o-mini')
+        @agent.tool()
+        def test_tool(x: str) -> str:
+            return f'Result: {x}'
+        assert len(agent.get_tools()) == 1
+        print('✅ Agent creation OK')
+        "
+
+    - name: Test multi-provider
+      run: |
+        python -c "
+        from react_agent_framework import ReactAgent
+        agent1 = ReactAgent(provider='gpt-4o-mini')
+        agent2 = ReactAgent(provider='ollama://llama3.2')
+        agent3 = ReactAgent(provider='llama3.2')
+        print('✅ Multi-provider OK')
+        "
+
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install build dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install build twine
+
+    - name: Build package
+      run: |
+        python -m build
+
+    - name: Check package
+      run: |
+        twine check dist/*
+        echo "✅ Package validation passed"
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: dist
+        path: dist/
