@@ -5,6 +5,93 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [0.10.0] - 2025-01-10
+
+### 🎯 BREAKING CHANGES
+
+**Refatoração completa do sistema de memória** - Separação conceitual entre Chat Memory e Knowledge Memory
+
+#### ⚠️ Mudanças na API
+
+**Antes (v0.9.x):**
+```python
+from react_agent_framework import ReactAgent
+from react_agent_framework.core.memory import SimpleMemory
+
+agent = ReactAgent(memory=SimpleMemory())
+```
+
+**Agora (v0.10.0):**
+```python
+from react_agent_framework import ReactAgent
+from react_agent_framework.core.memory.chat import SimpleChatMemory
+
+agent = ReactAgent(chat_memory=SimpleChatMemory())
+```
+
+### Adicionado
+
+- **Chat Memory System**: Sistema de memória para histórico de conversações
+  - `SimpleChatMemory`: Buffer em memória (sem persistência)
+  - `SQLiteChatMemory`: Banco SQLite para histórico persistente (**NOVO!**)
+  - Suporte multi-sessão
+  - Busca por palavra-chave
+  - Sem dependências externas (usa stdlib)
+
+- **Knowledge Memory System**: Sistema de memória para RAG/busca semântica
+  - `ChromaKnowledgeMemory`: ChromaDB para busca vetorial
+  - `FAISSKnowledgeMemory`: FAISS para alta performance
+  - API específica para documentos
+  - Busca semântica otimizada
+  - Metadados e filtros avançados
+
+- **Adapters**: Compatibilidade retroativa
+  - `LegacyMemoryAdapter`: Usa BaseMemory como ChatMemory
+  - `ChatToLegacyAdapter`: Usa ChatMemory como BaseMemory
+  - Código antigo continua funcionando!
+
+- **Documentação**:
+  - `MIGRATION_GUIDE.md`: Guia completo de migração
+  - Exemplos de uso dos dois tipos de memória
+  - Comparativo entre Chat e Knowledge Memory
+
+### Alterado
+
+- **Estrutura de Diretórios**:
+  ```
+  memory/
+  ├── chat/           # Chat Memory (NOVO)
+  ├── knowledge/      # Knowledge Memory (NOVO)
+  ├── adapters.py     # Compatibilidade (NOVO)
+  ├── base.py         # Legacy (mantido)
+  ├── simple.py       # Legacy (mantido)
+  ├── chroma.py       # Legacy (mantido)
+  └── faiss.py        # Legacy (mantido)
+  ```
+
+- **pyproject.toml**: Novas dependências opcionais
+  - `chat-sqlite`: SQLite (stdlib, sem deps)
+  - `chat-postgres`: PostgreSQL (futuro)
+  - `knowledge-chroma`: ChromaDB
+  - `knowledge-faiss`: FAISS
+  - Mantidos: `memory-chroma`, `memory-faiss` (legacy)
+
+- **Versão**: 0.9.1 → 0.10.0 (MINOR - nova funcionalidade)
+
+### Corrigido
+
+- **Separação conceitual correta**:
+  - Chat Memory: histórico conversacional sequencial
+  - Knowledge Memory: busca vetorial para RAG
+  - Antes: ChromaDB/FAISS usados para chat (incorreto)
+  - Agora: ChromaDB/FAISS exclusivos para RAG (correto)
+
+### Migração
+
+Consulte [MIGRATION_GUIDE.md](MIGRATION_GUIDE.md) para instruções detalhadas.
+
+**Compatibilidade retroativa garantida** - Código antigo continua funcionando via adapters!
+
 ## [0.9.1] - 2025-10-08
 
 ### Adicionado

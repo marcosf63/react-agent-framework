@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "react-agent-framework"
-version = "0.9.1"
+version = "0.10.0"
 description = "Complete AI agent framework with MCP support, environments, reasoning strategies, objectives, memory, and built-in tools"
 authors = [
     {name = "Marcos", email = "marcosf63@gmail.com"}
@@ -62,6 +62,30 @@ filesystem = [
 all-tools = [
     "duckduckgo-search>=4.0.0",
 ]
+# Chat memory (conversation history)
+chat-sqlite = [
+    # SQLite is stdlib - no dependencies needed
+]
+chat-postgres = [
+    "psycopg2-binary>=2.9.0",
+]
+all-chat = [
+    "psycopg2-binary>=2.9.0",
+]
+# Knowledge memory (RAG / semantic search)
+knowledge-chroma = [
+    "chromadb>=0.4.0",
+]
+knowledge-faiss = [
+    "faiss-cpu>=1.7.4",
+    "numpy>=1.24.0",
+]
+all-knowledge = [
+    "chromadb>=0.4.0",
+    "faiss-cpu>=1.7.4",
+    "numpy>=1.24.0",
+]
+# Legacy memory (backward compatibility)
 memory-chroma = [
     "chromadb>=0.4.0",
 ]
@@ -73,6 +97,7 @@ all-memory = [
     "chromadb>=0.4.0",
     "faiss-cpu>=1.7.4",
     "numpy>=1.24.0",
+    "psycopg2-binary>=2.9.0",
 ]
 all = [
     "anthropic>=0.18.0",
@@ -80,6 +105,7 @@ all = [
     "chromadb>=0.4.0",
     "faiss-cpu>=1.7.4",
     "numpy>=1.24.0",
+    "psycopg2-binary>=2.9.0",
     "mcp>=1.0.0",
 ]
 dev = [

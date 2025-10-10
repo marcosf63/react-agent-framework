@@ -3,7 +3,7 @@
 ## 📋 Informações Gerais
 
 - **Nome do Projeto**: ReAct Agent Framework
-- **Versão Atual**: 0.9.0
+- **Versão Atual**: 0.10.0
 - **Tipo**: Framework Python para Agentes AI
 - **Linguagem**: Python 3.8+
 - **Licença**: MIT
@@ -75,10 +75,11 @@ react-agent-framework/
 
 ## 🔄 Versionamento (Semantic Versioning)
 
-### Versão Atual: **0.9.0**
+### Versão Atual: **0.10.0**
 
 ### Histórico de Versões
 
+- **0.10.0** (2025-01-10): Memory System Refactoring (Chat + Knowledge separation)
 - **0.9.0** (2025-01-07): MCP Integration + Documentação completa
 - **0.8.0** (2025-01-06): Environment System
 - **0.7.0** (2025-01-06): Reasoning Strategies
