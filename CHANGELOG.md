@@ -5,6 +5,36 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [0.10.1] - 2025-01-11
+
+### 🐛 Correções
+
+- **Interface BaseChatMemory**: Melhorado método `get_context()` para suportar parâmetros compatíveis com ReactAgent
+  - Adicionado parâmetro `query` (busca com palavra-chave opcional)
+  - Adicionado parâmetro `max_tokens` (limite de tokens no contexto)
+  - Adicionado parâmetro `use_search` (ativar/desativar busca)
+  - Mantida retrocompatibilidade com `max_messages`
+
+- **ReactAgent**: Suporte completo para ambas interfaces de memória
+  - Aceita `BaseMemory` (interface antiga/legada)
+  - Aceita `BaseChatMemory` (interface nova v0.10.0)
+  - Conversão automática via `ChatToLegacyAdapter` quando necessário
+  - Type hints atualizados: `Union[BaseMemory, BaseChatMemory]`
+
+- **Imports**: Adicionados imports necessários em `ReactAgent`
+  - `BaseChatMemory` para type checking
+  - `ChatToLegacyAdapter` para conversão automática
+
+### 📝 Documentação
+
+- Melhorada documentação do parâmetro `memory` em `ReactAgent.__init__()`
+- Explicação clara sobre suporte a ambas interfaces
+
+### 🔧 Técnico
+
+Esta é uma versão PATCH (bugfix) que corrige incompatibilidades de interface sem quebrar código existente.
+Mantém 100% de retrocompatibilidade com v0.10.0 e v0.9.x.
+
 ## [0.10.0] - 2025-01-10
 
 ### 🎯 BREAKING CHANGES

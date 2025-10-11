@@ -11,7 +11,7 @@ Features:
 - MCP Integration: Connect to Model Context Protocol servers
 """
 
-__version__ = "0.9.0"
+__version__ = "0.10.1"
 __author__ = "Marcos"
 __description__ = "Complete AI agent framework with MCP support, environments, multiple reasoning strategies, multi-provider support, built-in tools, memory, and objectives"
 

@@ -11,6 +11,8 @@ from react_agent_framework.providers.base import BaseLLMProvider, Message
 from react_agent_framework.providers.factory import create_provider
 from react_agent_framework.core.memory.base import BaseMemory
 from react_agent_framework.core.memory.simple import SimpleMemory
+from react_agent_framework.core.memory.chat.base import BaseChatMemory
+from react_agent_framework.core.memory.adapters import ChatToLegacyAdapter
 from react_agent_framework.core.objectives.objective import Objective
 from react_agent_framework.core.objectives.tracker import ObjectiveTracker
 
@@ -75,7 +77,7 @@ class ReactAgent:
         max_iterations: int = 10,
         api_key: Optional[str] = None,
         execution_date: Optional[datetime] = None,
-        memory: Optional[BaseMemory] = None,
+        memory: Optional[Union[BaseMemory, BaseChatMemory]] = None,
         enable_memory: bool = False,
         objectives: Optional[List[Objective]] = None,
     ):
@@ -93,7 +95,9 @@ class ReactAgent:
             max_iterations: Maximum iterations
             api_key: API key for the provider (uses env if not provided)
             execution_date: Execution date (uses now() if not provided)
-            memory: Memory backend (SimpleMemory, ChromaMemory, FAISSMemory)
+            memory: Memory backend (BaseMemory or BaseChatMemory)
+                   Accepts both old (SimpleMemory, ChromaMemory) and new
+                   (SimpleChatMemory, SQLiteChatMemory) interfaces
             enable_memory: Enable simple memory if no memory backend provided
             objectives: List of objectives for the agent to pursue
         """
@@ -110,9 +114,14 @@ class ReactAgent:
         self._tool_descriptions: Dict[str, str] = {}
         self.history: List[Dict[str, Any]] = []
 
-        # Setup memory
+        # Setup memory (support both old BaseMemory and new BaseChatMemory)
         if memory is not None:
-            self.memory: Optional[BaseMemory] = memory
+            # If new BaseChatMemory interface, convert to legacy BaseMemory
+            # for backward compatibility with existing code
+            if isinstance(memory, BaseChatMemory):
+                self.memory: Optional[BaseMemory] = ChatToLegacyAdapter(memory)
+            else:
+                self.memory = memory
         elif enable_memory:
             self.memory = SimpleMemory(max_messages=100)
         else:

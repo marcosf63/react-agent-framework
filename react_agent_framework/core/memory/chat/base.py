@@ -178,20 +178,47 @@ class BaseChatMemory(ABC):
 
     def get_context(
         self,
+        query: Optional[str] = None,
+        max_tokens: int = 2000,
         max_messages: int = 10,
+        use_search: bool = True,
         session_id: Optional[str] = None,
     ) -> List[ChatMessage]:
         """
-        Get recent context for current conversation
+        Get relevant context for current conversation
 
         Args:
+            query: Current query (if provided, may use search)
+            max_tokens: Approximate token limit for context
             max_messages: Maximum messages to include in context
+            use_search: Use keyword search if available and query provided
             session_id: Get context for specific session (None = current session)
 
         Returns:
-            List of recent messages for context
+            List of relevant messages for context
         """
-        return self.get_recent(n=max_messages, session_id=session_id)
+        # If query provided and search enabled, try keyword search first
+        if query and use_search:
+            messages = self.search_messages(query, limit=max_messages, session_id=session_id)
+            if not messages:
+                # Fall back to recent if search has no results
+                messages = self.get_recent(n=max_messages, session_id=session_id)
+        else:
+            # Just get recent messages
+            messages = self.get_recent(n=max_messages, session_id=session_id)
+
+        # Filter by token limit (simple estimation: 4 chars ≈ 1 token)
+        total_chars = 0
+        context = []
+
+        for msg in reversed(messages):
+            msg_chars = len(msg.content)
+            if total_chars + msg_chars > max_tokens * 4:
+                break
+            context.insert(0, msg)
+            total_chars += msg_chars
+
+        return context
 
     def search_messages(
         self,
