@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "react-agent-framework"
-version = "0.10.1"
-description = "Complete AI agent framework with MCP support, environments, reasoning strategies, objectives, memory, and built-in tools"
+version = "0.11.0"
+description = "Complete AI agent framework with MCP support, infrastructure layer (monitoring, resilience, security, cost control, human-in-the-loop), environments, reasoning strategies, objectives, memory, and built-in tools"
 authors = [
     {name = "Marcos", email = "marcosf63@gmail.com"}
 ]
