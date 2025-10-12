@@ -3,9 +3,9 @@
 ## 📋 Informações Gerais
 
 - **Nome do Projeto**: ReAct Agent Framework
-- **Versão Atual**: 0.10.0
-- **Tipo**: Framework Python para Agentes AI
-- **Linguagem**: Python 3.8+
+- **Versão Atual**: 0.11.0
+- **Tipo**: Framework Python para Agentes AI Production-Ready
+- **Linguagem**: Python 3.9+
 - **Licença**: MIT
 - **Repositório**: https://github.com/marcosf63/react-agent-framework
 - **Documentação**: https://marcosf63.github.io/react-agent-framework/
@@ -47,6 +47,29 @@ react-agent-framework/
 │   │   ├── client.py              # Cliente MCP
 │   │   ├── adapter.py             # Adaptador de tools
 │   │   └── config.py              # Gerenciador de configuração
+│   ├── infrastructure/            # Layer 4: Agentic Infrastructure
+│   │   ├── monitoring/            # Monitoring System
+│   │   │   ├── metrics.py         # AgentMetrics (Prometheus)
+│   │   │   ├── logger.py          # AgentLogger (JSON logging)
+│   │   │   └── telemetry.py       # AgentTelemetry (tracing)
+│   │   ├── resilience/            # Resilience System
+│   │   │   ├── retry.py           # RetryStrategy
+│   │   │   ├── circuit_breaker.py # CircuitBreaker
+│   │   │   ├── fallback.py        # FallbackStrategy
+│   │   │   └── timeout.py         # TimeoutManager
+│   │   ├── security/              # Security System
+│   │   │   ├── permissions.py     # RBACManager
+│   │   │   ├── sandbox.py         # Sandbox
+│   │   │   ├── audit.py           # AuditLogger
+│   │   │   └── secrets.py         # SecretsManager
+│   │   ├── cost_control/          # Cost Control System
+│   │   │   ├── budget.py          # BudgetTracker
+│   │   │   ├── rate_limiter.py    # RateLimiter
+│   │   │   └── quota.py           # QuotaManager
+│   │   └── human_loop/            # Human-in-the-Loop System
+│   │       ├── approval.py        # ApprovalManager
+│   │       ├── intervention.py    # InterventionManager
+│   │       └── feedback.py        # FeedbackCollector
 │   ├── cli/                       # Interface CLI
 │   │   └── app.py                 # Aplicação Typer
 │   └── examples/                  # Exemplos
@@ -55,7 +78,12 @@ react-agent-framework/
 │       ├── multi_provider.py
 │       ├── memory_demo.py
 │       ├── objectives_demo.py
-│       └── mcp_demo.py
+│       ├── mcp_demo.py
+│       ├── infrastructure_monitoring_demo.py
+│       ├── infrastructure_resilience_demo.py
+│       ├── infrastructure_security_demo.py
+│       ├── infrastructure_cost_control_demo.py
+│       └── infrastructure_human_loop_demo.py
 ├── docs/                          # Documentação (MkDocs)
 │   ├── index.md                   # Página inicial
 │   ├── getting-started/           # Guias de início
@@ -75,11 +103,19 @@ react-agent-framework/
 
 ## 🔄 Versionamento (Semantic Versioning)
 
-### Versão Atual: **0.10.0**
+### Versão Atual: **0.11.0** 🚀
 
 ### Histórico de Versões
 
+- **0.11.0** (2025-01-11): Layer 4 - Agentic Infrastructure (Production-Ready)
+  - Part 1/5: Monitoring (Metrics, Logger, Telemetry)
+  - Part 2/5: Resilience (Retry, Circuit Breaker, Fallback, Timeout)
+  - Part 3/5: Security (RBAC, Sandbox, Audit, Secrets)
+  - Part 4/5: Cost Control (Budget, Rate Limiter, Quota)
+  - Part 5/5: Human-in-the-Loop (Approval, Intervention, Feedback)
+- **0.10.1** (2025-01-11): Memory System Bugfixes (interface compatibility)
 - **0.10.0** (2025-01-10): Memory System Refactoring (Chat + Knowledge separation)
+- **0.9.1** (2025-01-08): Bugfixes e melhorias
 - **0.9.0** (2025-01-07): MCP Integration + Documentação completa
 - **0.8.0** (2025-01-06): Environment System
 - **0.7.0** (2025-01-06): Reasoning Strategies
@@ -256,6 +292,47 @@ answer = agent.run("Your question")
   - Examples
   - Deploy automático via GitHub Pages
 
+### ✅ v0.10.0 - Memory Refactoring
+- **Separação Chat vs Knowledge Memory**:
+  - Chat Memory: Histórico de conversação
+  - Knowledge Memory: RAG / Semantic Search
+  - Interfaces separadas e especializadas
+  - Backward compatibility mantida
+
+### ✅ v0.10.1 - Bugfixes
+- Correções de compatibilidade de interface
+- Melhorias na integração ReactAgent + Memory
+
+### ✅ v0.11.0 - Layer 4: Agentic Infrastructure 🎉
+- **Part 1/5: Monitoring System**
+  - AgentMetrics (Prometheus export, token tracking, cost tracking)
+  - AgentLogger (structured JSON logging, context propagation)
+  - AgentTelemetry (distributed tracing, OpenTelemetry-compatible)
+
+- **Part 2/5: Resilience System**
+  - RetryStrategy (exponential backoff, jitter, configurable)
+  - CircuitBreaker (CLOSED/OPEN/HALF_OPEN states, fault isolation)
+  - FallbackStrategy (static, function, chain fallbacks)
+  - TimeoutManager (thread-based timeout enforcement)
+
+- **Part 3/5: Security System**
+  - RBACManager (20+ permissions, roles, wildcard support)
+  - Sandbox (file/network isolation, command whitelist)
+  - AuditLogger (compliance logging, structured events)
+  - SecretsManager (encrypted storage, expiration, rotation)
+
+- **Part 4/5: Cost Control System**
+  - BudgetTracker (multi-period budgets, alerts, projections)
+  - RateLimiter (token bucket + sliding window algorithms)
+  - QuotaManager (multi-type quotas, auto-reset)
+
+- **Part 5/5: Human-in-the-Loop System**
+  - ApprovalManager (6 policies, async approval, callbacks)
+  - InterventionManager (real-time intervention, step mode)
+  - FeedbackCollector (6 feedback types, analytics, export)
+
+**Total:** 5 sistemas, 15 componentes, ~5500 linhas, 100% thread-safe
+
 ## 📚 Documentação
 
 ### Estrutura da Documentação
@@ -295,19 +372,26 @@ docs/
 
 ## 🚀 Roadmap
 
-### v0.10.0 (Próxima versão)
+### v0.12.0 (Próxima versão)
 - [ ] Testes unitários com pytest (cobertura >80%)
-- [ ] CI/CD completo
+- [ ] CI/CD completo com GitHub Actions
 - [ ] Mais exemplos documentados
-- [ ] Tutoriais em vídeo
+- [ ] Documentação para Layer 4 Infrastructure
+
+### v0.13.0+ (Multi-Agent Systems)
+- [ ] Layer 3: Multi-Agent communication
+- [ ] Orchestration patterns
+- [ ] State coordination
+- [ ] Agent collaboration protocols
 
 ### v1.0.0 (Versão estável)
 - [ ] API estável e documentada
 - [ ] Cobertura de testes >= 80%
 - [ ] CI/CD completo com testes
 - [ ] Publicação no PyPI
-- [ ] Documentação completa
+- [ ] Documentação completa de todas as layers
 - [ ] Benchmarks de performance
+- [ ] Production deployment guides
 
 ## 📝 Notas de Desenvolvimento
 
@@ -348,5 +432,5 @@ pip install -e ".[dev]"
 
 ---
 
-Última atualização: 2025-01-07
-Versão: 0.9.0
+Última atualização: 2025-01-11
+Versão: 0.11.0 🚀 (Production-Ready)
