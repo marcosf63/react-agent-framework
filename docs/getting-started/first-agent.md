@@ -340,7 +340,7 @@ Here's a complete, production-ready example:
 
 ```python title="production_agent.py"
 from react_agent_framework import ReactAgent
-from react_agent_framework.core.memory import SimpleMemory
+from react_agent_framework.core.memory.chat import SimpleChatMemory
 import logging
 
 # Setup logging
@@ -354,7 +354,7 @@ def create_agent():
         provider="gpt-4o-mini",
         temperature=0.3,
         max_iterations=10,
-        memory=SimpleMemory(max_messages=100)
+        chat_memory=SimpleChatMemory(max_messages=100)
     )
 
     # Add tools
