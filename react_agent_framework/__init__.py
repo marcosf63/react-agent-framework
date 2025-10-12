@@ -10,11 +10,12 @@ Features:
 - Environments: Web, CLI, File system interaction
 - MCP Integration: Connect to Model Context Protocol servers
 - Infrastructure Layer: Monitoring, Resilience, Security, Cost Control, Human-in-the-Loop
+- Multi-Agent Systems: Communication, Orchestration, Coordination, Collaboration
 """
 
-__version__ = "0.11.0"
+__version__ = "0.12.0"
 __author__ = "Marcos"
-__description__ = "Production-ready AI agent framework with complete infrastructure layer (monitoring, resilience, security, cost control, human-in-the-loop), MCP support, environments, reasoning strategies, multi-provider support, built-in tools, memory, and objectives"
+__description__ = "Production-ready AI agent framework with multi-agent systems (communication, orchestration, coordination, collaboration), complete infrastructure layer, MCP support, environments, reasoning strategies, multi-provider support, built-in tools, memory, and objectives"
 
 from react_agent_framework.core.react_agent import ReactAgent
 from react_agent_framework.core.objectives.objective import Objective
