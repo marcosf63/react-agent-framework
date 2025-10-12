@@ -7,7 +7,7 @@
 <p align="center">
   <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="Python 3.8+"></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
-  <a href="https://github.com/marcosf63/react-agent-framework"><img src="https://img.shields.io/badge/version-0.9.0-green.svg" alt="Version"></a>
+  <a href="https://github.com/marcosf63/react-agent-framework"><img src="https://img.shields.io/badge/version-0.12.0-green.svg" alt="Version"></a>
 </p>
 
 <p align="center">
@@ -53,14 +53,17 @@ This cycle continues until the agent has enough information to provide a complet
     agent.use_tools("search.*", "filesystem.*")
     ```
 
--   :material-brain: __Memory Systems__
+-   :material-brain: __Memory Systems__ (v0.10.0+)
 
     ---
 
-    Simple, ChromaDB, and FAISS memory backends
+    Chat + Knowledge memory separation for better performance
 
     ```python
-    agent = ReactAgent(memory=ChromaMemory())
+    agent = ReactAgent(
+        chat_memory=SQLiteChatMemory("./chat.db"),
+        knowledge_memory=ChromaKnowledgeMemory("./kb")
+    )
     ```
 
 -   :material-target: __Objectives System__
