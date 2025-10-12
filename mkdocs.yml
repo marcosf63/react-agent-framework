@@ -147,6 +147,7 @@ nav:
   - Development:
     - contributing.md
     - changelog.md
+    - llms-txt.md
 
 # Extra
 extra:

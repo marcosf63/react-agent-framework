@@ -343,6 +343,14 @@ agent.add_mcp_server(
 
     [:octicons-arrow-right-24: Examples](examples/basic-usage.md)
 
+-   :material-robot: __LLMs.txt__
+
+    ---
+
+    Complete documentation for LLM consumption (800+ lines)
+
+    [:octicons-arrow-right-24: LLMs.txt](https://github.com/marcosf63/react-agent-framework/blob/main/LLMs.txt)
+
 </div>
 
 ---
