@@ -219,6 +219,13 @@ react-agent-framework/
 
 6. **Agent finishes** → "The capital of France is Paris"
 
+## 📚 Documentation
+
+- **Documentation**: https://marcosf63.github.io/react-agent-framework/
+- **LLMs.txt**: [Complete documentation for LLMs](./LLMs.txt) (800+ lines, all features v0.1.0-v0.12.0)
+- **Examples**: See [examples/](./react_agent_framework/examples/)
+- **API Reference**: https://marcosf63.github.io/react-agent-framework/api-reference/
+
 ## 📚 Examples
 
 ### Basic Example
