@@ -1,0 +1,1252 @@
+# ReAct Agent Framework - Complete Documentation for LLMs
+# Version: 0.12.0
+# Repository: https://github.com/marcosf63/react-agent-framework
+# Documentation: https://marcosf63.github.io/react-agent-framework/
+
+================================================================================
+TABLE OF CONTENTS
+================================================================================
+
+1. OVERVIEW & QUICK START
+2. INSTALLATION
+3. CORE CONCEPTS
+4. MEMORY SYSTEMS (v0.10.0+)
+5. MULTI-PROVIDER SUPPORT
+6. BUILT-IN TOOLS
+7. OBJECTIVES SYSTEM
+8. REASONING STRATEGIES
+9. ENVIRONMENTS
+10. MCP INTEGRATION
+11. LAYER 4: INFRASTRUCTURE (v0.11.0)
+    - Monitoring
+    - Resilience
+    - Security
+    - Cost Control
+    - Human-in-the-Loop
+12. LAYER 3: MULTI-AGENT SYSTEMS (v0.12.0)
+    - Communication
+    - Orchestration
+    - Coordination
+    - Collaboration
+13. COMPLETE API REFERENCE
+14. EXAMPLES & USE CASES
+
+================================================================================
+1. OVERVIEW & QUICK START
+================================================================================
+
+ReAct Agent Framework is a production-ready Python framework for building
+AI agents using the ReAct (Reasoning + Acting) pattern.
+
+QUICK START:
+```python
+from react_agent_framework import ReactAgent
+
+# Create agent
+agent = ReactAgent(
+    name="Assistant",
+    description="A helpful AI assistant",
+    provider="gpt-4o-mini"  # or anthropic://, google://, ollama://
+)
+
+# Add custom tools
+@agent.tool()
+def search(query: str) -> str:
+    """Search the internet"""
+    return search_results
+
+# Run agent
+answer = agent.run("What is the capital of France?")
+```
+
+KEY FEATURES:
+- Multi-provider support (OpenAI, Anthropic, Google, Ollama)
+- Memory systems (Chat + Knowledge separation)
+- Built-in tools (search, filesystem, computation)
+- Objectives tracking
+- Multiple reasoning strategies
+- Environment interaction (Web, CLI, Files)
+- MCP (Model Context Protocol) integration
+- Production infrastructure (monitoring, resilience, security)
+- Multi-agent systems (communication, orchestration)
+
+================================================================================
+2. INSTALLATION
+================================================================================
+
+BASIC:
+pip install react-agent-framework
+
+WITH ALL FEATURES:
+pip install react-agent-framework[all]
+
+SPECIFIC FEATURES:
+pip install react-agent-framework[chroma]      # ChromaDB memory
+pip install react-agent-framework[faiss]       # FAISS memory
+pip install react-agent-framework[dev]         # Development tools
+
+CLI USAGE:
+react-agent ask "Your question"
+react-agent interactive
+
+================================================================================
+3. CORE CONCEPTS
+================================================================================
+
+REACT PATTERN:
+1. Thought (Reasoning) - Think about what to do
+2. Action (Acting) - Execute actions using tools
+3. Observation - Analyze results
+4. Repeat until answer is found
+
+AGENT CREATION:
+```python
+from react_agent_framework import ReactAgent
+
+agent = ReactAgent(
+    name="Assistant",
+    description="What this agent does",
+    provider="gpt-4o-mini",          # LLM provider
+    temperature=0.7,                  # Creativity level
+    max_tokens=2000,                  # Max response length
+    max_iterations=10,                # Max reasoning loops
+    verbose=True                      # Show reasoning steps
+)
+```
+
+TOOL REGISTRATION (FastAPI-style):
+```python
+@agent.tool()
+def calculator(expression: str) -> str:
+    """Calculate mathematical expressions"""
+    return str(eval(expression))
+
+@agent.tool()
+def get_weather(city: str) -> str:
+    """Get current weather for a city"""
+    return f"Weather in {city}: Sunny, 72°F"
+```
+
+================================================================================
+4. MEMORY SYSTEMS (v0.10.0+)
+================================================================================
+
+IMPORTANT: v0.10.0 separated memory into TWO types:
+- Chat Memory: Sequential conversation history
+- Knowledge Memory: Semantic knowledge base (RAG)
+
+CHAT MEMORY:
+------------
+
+SimpleChatMemory (Development):
+```python
+from react_agent_framework.core.memory.chat import SimpleChatMemory
+
+agent = ReactAgent(
+    name="Agent",
+    chat_memory=SimpleChatMemory(max_messages=100)
+)
+```
+
+SQLiteChatMemory (Production):
+```python
+from react_agent_framework.core.memory.chat import SQLiteChatMemory
+
+agent = ReactAgent(
+    name="Agent",
+    chat_memory=SQLiteChatMemory(
+        db_path="./chat.db",
+        session_id="user_123",
+        max_messages=1000
+    )
+)
+```
+
+API:
+- add_message(content, role): Add message
+- get_history(max_messages): Get conversation
+- clear(): Clear history
+- get_stats(): Get statistics
+
+KNOWLEDGE MEMORY:
+-----------------
+
+ChromaKnowledgeMemory (General RAG):
+```python
+from react_agent_framework.core.memory.knowledge import ChromaKnowledgeMemory
+
+agent = ReactAgent(
+    name="Agent",
+    knowledge_memory=ChromaKnowledgeMemory(
+        collection_name="docs",
+        persist_directory="./kb",
+        embedding_function="default"  # or "openai"
+    )
+)
+
+# Add documents
+agent.knowledge_memory.add_document(
+    content="Python was created by Guido van Rossum",
+    metadata={"category": "programming", "date": "2025-01-01"}
+)
+
+# Semantic search
+results = agent.knowledge_memory.search(
+    query="programming language creators",
+    top_k=5,
+    filter={"category": "programming"}
+)
+```
+
+FAISSKnowledgeMemory (High-performance):
+```python
+from react_agent_framework.core.memory.knowledge import FAISSKnowledgeMemory
+
+agent = ReactAgent(
+    name="Agent",
+    knowledge_memory=FAISSKnowledgeMemory(
+        index_path="./faiss",
+        dimension=384,
+        index_type="Flat"  # or "IVF", "HNSW"
+    )
+)
+```
+
+Index Types:
+- Flat: 100% accuracy, slower (< 100K docs)
+- IVF: ~95% accuracy, fast (100K-1M docs)
+- HNSW: ~98% accuracy, very fast (> 1M docs)
+
+USING BOTH TOGETHER:
+```python
+agent = ReactAgent(
+    name="Complete Agent",
+    chat_memory=SQLiteChatMemory("./chat.db"),      # Conversations
+    knowledge_memory=ChromaKnowledgeMemory("./kb")  # Facts/knowledge
+)
+```
+
+LEGACY API (v0.5.0-v0.9.0):
+Still supported but deprecated:
+```python
+from react_agent_framework.core.memory import SimpleMemory, ChromaMemory
+agent = ReactAgent(memory=SimpleMemory())  # Old way
+```
+
+================================================================================
+5. MULTI-PROVIDER SUPPORT
+================================================================================
+
+OPENAI:
+```python
+agent = ReactAgent(provider="gpt-4o-mini")
+agent = ReactAgent(provider="gpt-4")
+agent = ReactAgent(provider="gpt-4-turbo")
+```
+
+ANTHROPIC:
+```python
+agent = ReactAgent(provider="anthropic://claude-3-5-sonnet-20241022")
+agent = ReactAgent(provider="anthropic://claude-3-opus-20240229")
+```
+
+GOOGLE:
+```python
+agent = ReactAgent(provider="google://gemini-1.5-flash")
+agent = ReactAgent(provider="google://gemini-1.5-pro")
+```
+
+OLLAMA (Local):
+```python
+agent = ReactAgent(provider="ollama://llama3.2")
+agent = ReactAgent(provider="ollama://mistral")
+```
+
+API KEYS:
+Set in .env file:
+OPENAI_API_KEY=sk-...
+ANTHROPIC_API_KEY=sk-ant-...
+GOOGLE_API_KEY=AI...
+
+Or pass directly:
+```python
+agent = ReactAgent(
+    provider="gpt-4o-mini",
+    api_key="sk-..."
+)
+```
+
+================================================================================
+6. BUILT-IN TOOLS
+================================================================================
+
+USE BUILT-IN TOOLS:
+```python
+# Use all search tools
+agent.use_tools("search.*")
+
+# Use specific tools
+agent.use_tools("filesystem.read", "filesystem.write")
+
+# Use all tools
+agent.use_tools("*")
+```
+
+AVAILABLE TOOLS:
+
+SEARCH:
+- search.duckduckgo: Web search
+
+FILESYSTEM:
+- filesystem.read: Read files
+- filesystem.write: Write files
+- filesystem.list: List directory contents
+- filesystem.delete: Delete files
+
+COMPUTATION:
+- computation.calculator: Evaluate expressions
+- computation.python: Execute Python code
+- computation.shell: Run shell commands (safe mode)
+
+TOOL REGISTRY:
+```python
+from react_agent_framework.tools import ToolRegistry
+
+registry = ToolRegistry()
+all_tools = registry.get_all_tools()
+search_tools = registry.get_tools_by_pattern("search.*")
+```
+
+================================================================================
+7. OBJECTIVES SYSTEM
+================================================================================
+
+OBJECTIVES:
+Give agents goals to pursue and track progress.
+
+```python
+from react_agent_framework.core.objectives import Objective, Priority
+
+# Add objective
+agent.objectives.add(Objective(
+    goal="Research climate change solutions",
+    priority=Priority.HIGH,
+    success_criteria=[
+        "Find 5 viable solutions",
+        "Analyze feasibility of each",
+        "Estimate costs"
+    ],
+    deadline="2025-02-01"
+))
+
+# Agent keeps objectives in mind while working
+answer = agent.run("Help me with climate research")
+
+# Check progress
+objectives = agent.objectives.get_all()
+for obj in objectives:
+    print(f"{obj.goal}: {obj.progress}%")
+    print(f"Status: {obj.status}")
+```
+
+PRIORITY LEVELS:
+- Priority.LOW
+- Priority.NORMAL
+- Priority.HIGH
+- Priority.URGENT
+- Priority.CRITICAL
+
+OBJECTIVE STATUS:
+- PENDING: Not started
+- IN_PROGRESS: Working on it
+- COMPLETED: Finished
+- FAILED: Could not complete
+
+================================================================================
+8. REASONING STRATEGIES
+================================================================================
+
+AVAILABLE STRATEGIES:
+
+ReAct (Iterative):
+```python
+from react_agent_framework.core.reasoning import ReActReasoning
+
+reasoning = ReActReasoning(agent, tools)
+result = reasoning.reason("Solve this problem")
+```
+
+ReWOO (Plan-then-Execute):
+```python
+from react_agent_framework.core.reasoning import ReWOOReasoning
+
+reasoning = ReWOOReasoning(agent, tools)
+result = reasoning.reason("Complex multi-step task")
+```
+
+Reflection (Self-Critique):
+```python
+from react_agent_framework.core.reasoning import ReflectionReasoning
+
+reasoning = ReflectionReasoning(agent, tools, max_reflections=3)
+result = reasoning.reason("Task requiring quality checks")
+```
+
+Plan-Execute (Adaptive Planning):
+```python
+from react_agent_framework.core.reasoning import PlanExecuteReasoning
+
+reasoning = PlanExecuteReasoning(agent, tools)
+result = reasoning.reason("Long-term project")
+```
+
+================================================================================
+9. ENVIRONMENTS
+================================================================================
+
+ENVIRONMENTS:
+Allow agents to interact with different systems.
+
+WEB ENVIRONMENT:
+```python
+from react_agent_framework.core.environment import WebEnvironment, Action
+
+env = WebEnvironment(headless=True)
+obs = env.step(Action("navigate", {"url": "https://example.com"}))
+obs = env.step(Action("click", {"selector": "#button"}))
+obs = env.step(Action("type", {"selector": "#input", "text": "hello"}))
+```
+
+CLI ENVIRONMENT:
+```python
+from react_agent_framework.core.environment import CLIEnvironment, Action
+
+env = CLIEnvironment(safe_mode=True)  # Whitelist only
+obs = env.step(Action("execute", {"command": "ls -la"}))
+```
+
+FILE ENVIRONMENT:
+```python
+from react_agent_framework.core.environment import FileEnvironment, Action
+
+env = FileEnvironment(base_path="./workspace", safe_mode=True)
+obs = env.step(Action("read", {"path": "file.txt"}))
+obs = env.step(Action("write", {"path": "output.txt", "content": "data"}))
+```
+
+SAFE MODE:
+All environments have safe_mode to prevent dangerous operations.
+
+================================================================================
+10. MCP INTEGRATION
+================================================================================
+
+MCP (Model Context Protocol):
+Connect to external tool servers.
+
+```python
+# Add MCP server
+agent.add_mcp_server(
+    command="npx",
+    args=["-y", "@modelcontextprotocol/server-filesystem", "/tmp"],
+    name="filesystem"
+)
+
+# Add GitHub server
+agent.add_mcp_server(
+    command="npx",
+    args=["-y", "@modelcontextprotocol/server-github"],
+    env={"GITHUB_TOKEN": "ghp_..."},
+    name="github"
+)
+
+# Tools automatically available
+answer = agent.run("List files in /tmp")
+```
+
+POPULAR MCP SERVERS:
+- @modelcontextprotocol/server-filesystem
+- @modelcontextprotocol/server-github
+- @modelcontextprotocol/server-postgres
+- @modelcontextprotocol/server-slack
+
+================================================================================
+11. LAYER 4: INFRASTRUCTURE (v0.11.0)
+================================================================================
+
+MONITORING:
+-----------
+
+AgentMetrics (Prometheus):
+```python
+from react_agent_framework.infrastructure.monitoring import AgentMetrics
+
+metrics = AgentMetrics(agent_id="agent_1")
+metrics.increment_executions()
+metrics.increment_errors()
+metrics.track_tokens(500)
+metrics.track_cost(0.01, provider="openai")
+
+# Export Prometheus format
+print(metrics.export_prometheus())
+```
+
+AgentLogger (Structured):
+```python
+from react_agent_framework.infrastructure.monitoring import AgentLogger
+
+logger = AgentLogger(
+    agent_id="agent_1",
+    log_file="./logs/agent.log",
+    log_level="INFO"
+)
+
+logger.info("Agent started", extra={"user": "alice"})
+logger.error("Tool failed", extra={"tool": "search"})
+```
+
+AgentTelemetry (Tracing):
+```python
+from react_agent_framework.infrastructure.monitoring import AgentTelemetry
+
+telemetry = AgentTelemetry(service_name="my_agent")
+
+with telemetry.start_span("agent_execution") as span:
+    result = agent.run("task")
+    span.set_status("success")
+```
+
+RESILIENCE:
+-----------
+
+RetryStrategy:
+```python
+from react_agent_framework.infrastructure.resilience import RetryStrategy
+
+retry = RetryStrategy(
+    max_attempts=3,
+    initial_delay=1.0,
+    max_delay=60.0,
+    exponential_base=2.0,
+    jitter=True
+)
+
+result = retry.execute(lambda: agent.run("task"))
+```
+
+CircuitBreaker:
+```python
+from react_agent_framework.infrastructure.resilience import CircuitBreaker
+
+breaker = CircuitBreaker(
+    failure_threshold=5,
+    timeout=60.0,
+    half_open_max_calls=3
+)
+
+result = breaker.call(lambda: agent.run("task"))
+```
+
+FallbackStrategy:
+```python
+from react_agent_framework.infrastructure.resilience import FallbackStrategy
+
+fallback = FallbackStrategy(fallback_value="Service unavailable")
+result = fallback.execute(lambda: agent.run("task"))
+```
+
+TimeoutManager:
+```python
+from react_agent_framework.infrastructure.resilience import TimeoutManager
+
+timeout = TimeoutManager(timeout=30.0)
+result = timeout.execute(lambda: agent.run("task"))
+```
+
+SECURITY:
+---------
+
+RBACManager (Permissions):
+```python
+from react_agent_framework.infrastructure.security import RBACManager
+
+rbac = RBACManager()
+rbac.create_role("researcher", {"tools.search", "tools.read"})
+rbac.assign_role("agent_1", "researcher")
+
+if rbac.check_permission("agent_1", "tools.search"):
+    agent.run("search task")
+```
+
+Sandbox (Safe Execution):
+```python
+from react_agent_framework.infrastructure.security import Sandbox
+
+sandbox = Sandbox(
+    allowed_paths=["/tmp"],
+    network_enabled=False,
+    allowed_commands=["ls", "cat", "grep"]
+)
+
+result = sandbox.execute_code("print('safe code')")
+result = sandbox.execute_command(["ls", "/tmp"])
+```
+
+AuditLogger (Compliance):
+```python
+from react_agent_framework.infrastructure.security import AuditLogger
+
+audit = AuditLogger(log_path="./audit.log")
+audit.log_action("agent_1", "TOOL_EXECUTION", {"tool": "search"})
+```
+
+SecretsManager:
+```python
+from react_agent_framework.infrastructure.security import SecretsManager
+
+secrets = SecretsManager(storage_path="./secrets.enc")
+secrets.store("api_key", "sk-...", expires_in=86400)
+api_key = secrets.retrieve("api_key")
+```
+
+COST CONTROL:
+-------------
+
+BudgetTracker:
+```python
+from react_agent_framework.infrastructure.cost_control import BudgetTracker
+
+budget = BudgetTracker()
+budget.set_budget("daily", 10.0)
+budget.set_budget("monthly", 200.0)
+
+budget.track_cost(0.05, "openai")
+status = budget.check_budget("daily")  # True/False
+```
+
+RateLimiter:
+```python
+from react_agent_framework.infrastructure.cost_control import RateLimiter
+
+limiter = RateLimiter(max_calls=100, window_seconds=60)
+
+if limiter.allow("agent_1"):
+    agent.run("task")
+```
+
+QuotaManager:
+```python
+from react_agent_framework.infrastructure.cost_control import QuotaManager
+
+quota = QuotaManager()
+quota.set_quota("agent_1", "requests", 1000, "daily")
+
+if quota.check_quota("agent_1", "requests"):
+    agent.run("task")
+    quota.consume("agent_1", "requests", 1)
+```
+
+HUMAN-IN-THE-LOOP:
+------------------
+
+ApprovalManager:
+```python
+from react_agent_framework.infrastructure.human_loop import ApprovalManager
+
+approver = ApprovalManager(policy="high_risk_only")
+
+if approver.requires_approval(action="delete_file"):
+    approved = approver.request_approval(
+        action="delete_file",
+        context={"file": "important.txt"}
+    )
+    if approved:
+        # Proceed
+```
+
+InterventionManager:
+```python
+from react_agent_framework.infrastructure.human_loop import InterventionManager
+
+intervention = InterventionManager()
+intervention.enable_step_mode()
+
+for step in agent_steps:
+    if intervention.should_intervene():
+        action = intervention.get_human_input()
+```
+
+FeedbackCollector:
+```python
+from react_agent_framework.infrastructure.human_loop import FeedbackCollector
+
+feedback = FeedbackCollector()
+feedback.collect(
+    agent_id="agent_1",
+    feedback_type="rating",
+    content={"rating": 5, "comment": "Great!"}
+)
+```
+
+================================================================================
+12. LAYER 3: MULTI-AGENT SYSTEMS (v0.12.0)
+================================================================================
+
+COMMUNICATION:
+--------------
+
+Message & MessageBus:
+```python
+from react_agent_framework.multi_agent.communication import (
+    Message, MessageBus, MessageType, MessagePriority
+)
+
+bus = MessageBus()
+
+# Send message
+msg = Message(
+    sender="agent_1",
+    receiver="agent_2",
+    message_type=MessageType.REQUEST,
+    content="Please analyze this data",
+    priority=MessagePriority.HIGH
+)
+bus.send(msg)
+
+# Receive messages
+messages = bus.receive("agent_2", max_messages=10)
+```
+
+Message Types:
+- INFORM, REQUEST, RESPONSE, QUERY
+- PROPOSE, ACCEPT, REJECT
+- CONFIRM, CANCEL, NOTIFY
+- COMMAND, REPORT
+
+ACL Protocols:
+```python
+from react_agent_framework.multi_agent.communication import ACLProtocol
+
+protocol = ACLProtocol(bus)
+protocol.inform("agent_1", "agent_2", "Task completed")
+protocol.request("agent_1", "agent_2", "analyze", {"data": "..."})
+protocol.propose("agent_1", "agent_2", {"solution": "..."})
+```
+
+Channels:
+```python
+from react_agent_framework.multi_agent.communication import (
+    DirectChannel, BroadcastChannel, MulticastChannel
+)
+
+# Direct 1-to-1
+direct = DirectChannel(bus)
+direct.send("agent_1", "agent_2", "message")
+
+# Broadcast to all
+broadcast = BroadcastChannel(bus, ["agent_1", "agent_2", "agent_3"])
+broadcast.send("agent_1", "announcement")
+
+# Topic-based pub/sub
+multicast = MulticastChannel(bus)
+multicast.subscribe("agent_2", "updates")
+multicast.publish("agent_1", "updates", "news")
+```
+
+ORCHESTRATION:
+--------------
+
+Orchestrator:
+```python
+from react_agent_framework.multi_agent.orchestration import Orchestrator
+
+orch = Orchestrator(bus, orchestrator_id="main")
+orch.register_agent("agent_1", {"search", "analyze"})
+orch.register_agent("agent_2", {"write", "format"})
+
+result = orch.distribute_task(
+    task_id="task_1",
+    task_type="search",
+    task_data={"query": "AI trends"},
+    required_capability="search"
+)
+```
+
+Workflow Engine:
+```python
+from react_agent_framework.multi_agent.orchestration import (
+    Workflow, WorkflowEngine, WorkflowStep, StepType
+)
+
+workflow = Workflow(workflow_id="data_pipeline")
+workflow.add_step(WorkflowStep(
+    step_id="fetch",
+    action=fetch_data,
+    step_type=StepType.SEQUENTIAL
+))
+workflow.add_step(WorkflowStep(
+    step_id="process",
+    action=process_data,
+    step_type=StepType.PARALLEL,
+    dependencies={"fetch"}
+))
+
+engine = WorkflowEngine()
+result = engine.execute(workflow, context={})
+```
+
+TaskDelegator:
+```python
+from react_agent_framework.multi_agent.orchestration import (
+    TaskDelegator, LoadBalancingStrategy
+)
+
+delegator = TaskDelegator(
+    bus,
+    strategy=LoadBalancingStrategy.LEAST_LOADED
+)
+
+delegator.register_agent("agent_1", {"capability": "search"})
+allocation = delegator.delegate_task(
+    task_id="task_1",
+    task_type="search",
+    task_data={"query": "..."}
+)
+```
+
+Load Balancing Strategies:
+- ROUND_ROBIN: Rotate agents
+- LEAST_LOADED: Choose least busy
+- CAPABILITY_BASED: Match capabilities
+- PERFORMANCE_BASED: Choose best performer
+
+RoleManager:
+```python
+from react_agent_framework.multi_agent.orchestration import RoleManager, Role
+
+roles = RoleManager()
+roles.assign_role("agent_1", Role.LEADER, {"coordination"})
+roles.assign_role("agent_2", Role.WORKER, {"execution"})
+roles.assign_role("agent_3", Role.SPECIALIST, {"analysis"})
+```
+
+Roles:
+- LEADER: Coordinates team
+- WORKER: Executes tasks
+- SPECIALIST: Expert in domain
+- OBSERVER: Monitors only
+- VALIDATOR: Checks quality
+- FACILITATOR: Supports team
+
+COORDINATION:
+-------------
+
+SharedState:
+```python
+from react_agent_framework.multi_agent.coordination import SharedState
+
+state = SharedState()
+state.set("counter", 0, modified_by="agent_1")
+state.update("counter", lambda x: x + 1, modified_by="agent_2")
+value = state.get("counter")
+```
+
+ConsensusManager:
+```python
+from react_agent_framework.multi_agent.coordination import (
+    ConsensusManager, ConsensusType
+)
+
+consensus = ConsensusManager()
+consensus.create_proposal(
+    proposal_id="prop_1",
+    proposer="agent_1",
+    content={"action": "deploy"},
+    consensus_type=ConsensusType.MAJORITY
+)
+
+consensus.vote("prop_1", "agent_1", True)
+consensus.vote("prop_1", "agent_2", True)
+result = consensus.get_result("prop_1")  # True if consensus reached
+```
+
+Consensus Types:
+- MAJORITY: > 50% agree
+- UNANIMOUS: 100% agree
+- QUORUM: Custom threshold
+
+LockManager:
+```python
+from react_agent_framework.multi_agent.coordination import LockManager
+
+locks = LockManager()
+
+if locks.acquire_lock("resource_1", "agent_1", timeout=5.0):
+    # Use resource
+    locks.release_lock("resource_1", "agent_1")
+```
+
+ConflictResolver:
+```python
+from react_agent_framework.multi_agent.coordination import (
+    ConflictResolver, ConflictResolutionStrategy
+)
+
+resolver = ConflictResolver(strategy=ConflictResolutionStrategy.TIMESTAMP)
+result = resolver.resolve(conflict)
+```
+
+COLLABORATION:
+--------------
+
+Team Management:
+```python
+from react_agent_framework.multi_agent.collaboration import TeamManager
+
+teams = TeamManager()
+teams.create_team("team_1", "Research Team", leader="agent_1")
+teams.add_member("team_1", "agent_2")
+teams.add_goal("team_1", "Complete market analysis")
+```
+
+Collaboration Patterns:
+```python
+from react_agent_framework.multi_agent.collaboration import (
+    HierarchicalPattern, PeerToPeerPattern
+)
+
+# Hierarchical (leader + workers)
+pattern = HierarchicalPattern(leader="agent_1", workers=["agent_2", "agent_3"])
+pattern.delegate_task("agent_2", task)
+
+# Peer-to-peer (all equal)
+pattern = PeerToPeerPattern(agents=["agent_1", "agent_2", "agent_3"])
+pattern.broadcast_task(task)
+```
+
+Contract Net Protocol:
+```python
+from react_agent_framework.multi_agent.collaboration import ContractNetProtocol
+
+cnp = ContractNetProtocol(bus)
+cnp.call_for_proposals("task_1", task_description)
+cnp.submit_bid("task_1", "agent_1", bid_value=10.0)
+cnp.submit_bid("task_1", "agent_2", bid_value=8.0)
+winner = cnp.select_winner("task_1")  # "agent_2"
+```
+
+Shared Knowledge Base:
+```python
+from react_agent_framework.multi_agent.collaboration import SharedKnowledgeBase
+
+kb = SharedKnowledgeBase()
+kb.add_knowledge("agent_1", "Python best practices", {"topic": "coding"})
+results = kb.search("coding standards")
+```
+
+================================================================================
+13. COMPLETE API REFERENCE
+================================================================================
+
+REACTAGENT CLASS:
+-----------------
+
+Constructor:
+ReactAgent(
+    name: str,                           # Agent name
+    description: str = "",               # What agent does
+    provider: str = "gpt-4o-mini",      # LLM provider
+    temperature: float = 0.7,            # 0.0-1.0
+    max_tokens: int = 2000,              # Max response
+    max_iterations: int = 10,            # Max reasoning loops
+    verbose: bool = False,               # Show steps
+    chat_memory: BaseChatMemory = None,  # v0.10.0+
+    knowledge_memory: BaseKnowledgeMemory = None,  # v0.10.0+
+    memory: BaseMemory = None,           # Legacy (deprecated)
+    api_key: str = None                  # Override env var
+)
+
+Methods:
+- run(query: str) -> str: Execute agent with query
+- tool()(func): Decorator to register tool
+- use_tools(*patterns): Register built-in tools
+- add_mcp_server(command, args, name, env): Add MCP server
+- objectives.add(objective): Add objective
+- objectives.get_all(): Get all objectives
+
+MEMORY API:
+-----------
+
+ChatMemory:
+- add_message(content, role): Add message
+- get_history(max_messages): Get history
+- clear(): Clear
+- get_stats(): Statistics
+
+KnowledgeMemory:
+- add_document(content, metadata): Add document
+- add_documents(docs): Batch add
+- search(query, top_k, filter): Semantic search
+- delete_collection(): Remove all
+- get_stats(): Statistics
+
+TOOL DECORATOR:
+---------------
+
+@agent.tool()
+def function_name(param: type) -> return_type:
+    """Description for LLM"""
+    return result
+
+Tool description (docstring) is shown to LLM for tool selection.
+
+OBJECTIVES API:
+---------------
+
+Objective(
+    goal: str,
+    priority: Priority = Priority.NORMAL,
+    success_criteria: List[str] = [],
+    deadline: str = None
+)
+
+agent.objectives.add(objective)
+agent.objectives.get_all()
+agent.objectives.update_progress(objective_id, progress)
+agent.objectives.complete(objective_id)
+
+================================================================================
+14. EXAMPLES & USE CASES
+================================================================================
+
+EXAMPLE 1: Simple Q&A Agent
+```python
+from react_agent_framework import ReactAgent
+
+agent = ReactAgent(name="QA Bot", provider="gpt-4o-mini")
+
+@agent.tool()
+def get_info(topic: str) -> str:
+    """Get information about a topic"""
+    return f"Info about {topic}"
+
+answer = agent.run("Tell me about Python")
+```
+
+EXAMPLE 2: Research Agent with Memory
+```python
+from react_agent_framework import ReactAgent
+from react_agent_framework.core.memory.chat import SQLiteChatMemory
+from react_agent_framework.core.memory.knowledge import ChromaKnowledgeMemory
+
+agent = ReactAgent(
+    name="Research Assistant",
+    chat_memory=SQLiteChatMemory("./research.db"),
+    knowledge_memory=ChromaKnowledgeMemory("./research_kb")
+)
+
+agent.use_tools("search.*")
+
+# Populate knowledge base
+agent.knowledge_memory.add_document("AI paper summary...")
+
+# Research conversation
+agent.run("Find recent AI breakthroughs")
+agent.run("What did we discuss about AI?")  # Uses chat memory
+agent.run("What do you know about AI?")     # Uses knowledge memory
+```
+
+EXAMPLE 3: Production Agent with Infrastructure
+```python
+from react_agent_framework import ReactAgent
+from react_agent_framework.infrastructure.monitoring import AgentMetrics, AgentLogger
+from react_agent_framework.infrastructure.resilience import RetryStrategy, CircuitBreaker
+from react_agent_framework.infrastructure.security import RBACManager, Sandbox
+from react_agent_framework.infrastructure.cost_control import BudgetTracker
+
+# Setup infrastructure
+metrics = AgentMetrics("prod_agent")
+logger = AgentLogger("prod_agent", log_file="./logs/agent.log")
+retry = RetryStrategy(max_attempts=3)
+breaker = CircuitBreaker(failure_threshold=5)
+rbac = RBACManager()
+sandbox = Sandbox()
+budget = BudgetTracker()
+
+budget.set_budget("daily", 50.0)
+
+# Create agent
+agent = ReactAgent(
+    name="Production Agent",
+    provider="gpt-4o-mini"
+)
+
+# Execute with infrastructure
+if budget.check_budget("daily"):
+    if rbac.check_permission("prod_agent", "execute"):
+        try:
+            result = retry.execute(
+                lambda: breaker.call(
+                    lambda: agent.run("task")
+                )
+            )
+            metrics.increment_executions()
+            logger.info("Task completed", extra={"result": result})
+        except Exception as e:
+            metrics.increment_errors()
+            logger.error("Task failed", extra={"error": str(e)})
+```
+
+EXAMPLE 4: Multi-Agent System
+```python
+from react_agent_framework import ReactAgent
+from react_agent_framework.multi_agent.communication import MessageBus, ACLProtocol
+from react_agent_framework.multi_agent.orchestration import Orchestrator
+from react_agent_framework.multi_agent.collaboration import TeamManager
+
+# Setup
+bus = MessageBus()
+protocol = ACLProtocol(bus)
+orch = Orchestrator(bus, "main")
+teams = TeamManager()
+
+# Create agents
+researcher = ReactAgent(name="Researcher")
+writer = ReactAgent(name="Writer")
+reviewer = ReactAgent(name="Reviewer")
+
+# Register
+orch.register_agent("researcher", {"research", "analyze"})
+orch.register_agent("writer", {"write", "format"})
+orch.register_agent("reviewer", {"review", "edit"})
+
+# Create team
+teams.create_team("content_team", "Content Creation", leader="researcher")
+teams.add_member("content_team", "writer")
+teams.add_member("content_team", "reviewer")
+
+# Orchestrate workflow
+result_1 = orch.distribute_task("task_1", "research", {"topic": "AI"})
+result_2 = orch.distribute_task("task_2", "write", {"content": result_1})
+result_3 = orch.distribute_task("task_3", "review", {"draft": result_2})
+```
+
+EXAMPLE 5: Complete Production System
+```python
+from react_agent_framework import ReactAgent
+from react_agent_framework.core.memory.chat import SQLiteChatMemory
+from react_agent_framework.core.memory.knowledge import ChromaKnowledgeMemory
+from react_agent_framework.core.objectives import Objective, Priority
+from react_agent_framework.infrastructure.monitoring import AgentMetrics, AgentLogger, AgentTelemetry
+from react_agent_framework.infrastructure.resilience import RetryStrategy, CircuitBreaker
+from react_agent_framework.infrastructure.security import RBACManager, Sandbox, AuditLogger
+from react_agent_framework.infrastructure.cost_control import BudgetTracker, RateLimiter
+from react_agent_framework.infrastructure.human_loop import ApprovalManager
+
+# Infrastructure
+metrics = AgentMetrics("enterprise_agent")
+logger = AgentLogger("enterprise_agent")
+telemetry = AgentTelemetry("enterprise")
+retry = RetryStrategy(max_attempts=3)
+breaker = CircuitBreaker()
+rbac = RBACManager()
+sandbox = Sandbox()
+audit = AuditLogger()
+budget = BudgetTracker()
+limiter = RateLimiter(max_calls=1000, window_seconds=3600)
+approver = ApprovalManager(policy="high_risk_only")
+
+# Setup
+rbac.create_role("analyst", {"tools.search", "tools.read", "tools.analyze"})
+rbac.assign_role("enterprise_agent", "analyst")
+budget.set_budget("daily", 100.0)
+budget.set_budget("monthly", 2000.0)
+
+# Agent
+agent = ReactAgent(
+    name="Enterprise Agent",
+    description="Production-ready enterprise agent",
+    provider="gpt-4o-mini",
+    chat_memory=SQLiteChatMemory("./enterprise_chat.db"),
+    knowledge_memory=ChromaKnowledgeMemory("./enterprise_kb")
+)
+
+agent.use_tools("search.*", "filesystem.read")
+
+# Add objective
+agent.objectives.add(Objective(
+    goal="Analyze Q4 2024 market trends",
+    priority=Priority.HIGH,
+    success_criteria=["Collect data", "Analyze trends", "Generate report"]
+))
+
+# Execute with full infrastructure
+def execute_task(task: str):
+    # Check permissions
+    if not rbac.check_permission("enterprise_agent", "execute"):
+        return "Permission denied"
+
+    # Check rate limit
+    if not limiter.allow("enterprise_agent"):
+        return "Rate limit exceeded"
+
+    # Check budget
+    if not budget.check_budget("daily"):
+        return "Daily budget exceeded"
+
+    # Request approval for high-risk
+    if approver.requires_approval(action="execute"):
+        if not approver.request_approval(action="execute", context={"task": task}):
+            return "Approval denied"
+
+    # Audit log
+    audit.log_action("enterprise_agent", "TASK_START", {"task": task})
+
+    # Execute with telemetry, retry, circuit breaker
+    with telemetry.start_span("task_execution") as span:
+        try:
+            result = retry.execute(
+                lambda: breaker.call(
+                    lambda: agent.run(task)
+                )
+            )
+
+            # Track success
+            metrics.increment_executions()
+            metrics.track_cost(0.10, "openai")
+            budget.track_cost(0.10, "openai")
+            logger.info("Task completed", extra={"task": task, "result": result})
+            audit.log_action("enterprise_agent", "TASK_SUCCESS", {"task": task})
+            span.set_status("success")
+
+            return result
+
+        except Exception as e:
+            # Track failure
+            metrics.increment_errors()
+            logger.error("Task failed", extra={"task": task, "error": str(e)})
+            audit.log_action("enterprise_agent", "TASK_FAILURE", {"task": task, "error": str(e)})
+            span.set_status("error")
+            raise
+
+# Use
+result = execute_task("Analyze Q4 market data")
+print(result)
+
+# Check metrics
+print(metrics.export_prometheus())
+print(f"Budget status: {budget.check_budget('daily')}")
+```
+
+================================================================================
+END OF DOCUMENTATION
+================================================================================
+
+For latest documentation, visit:
+https://marcosf63.github.io/react-agent-framework/
+
+Repository:
+https://github.com/marcosf63/react-agent-framework
+
+Report issues:
+https://github.com/marcosf63/react-agent-framework/issues
